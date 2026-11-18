@@ -67,6 +67,21 @@ async function verifyJWT(token: string, secret: string): Promise<any | null> {
   }
 }
 
+/**
+ * Where the middleware asks this same application for the live session (/api/auth/me).
+ *
+ * Self-hosted `next start` behind a TLS proxy (Railway, Docker + nginx) builds req.url as https://localhost:PORT/… from the
+ * proxy's x-forwarded-proto, while the application itself listens on plain HTTP — the self-call then fails its TLS handshake and
+ * every signed-in page answered 503. A loopback address is therefore always called over http://; INTERNAL_APP_URL can name the
+ * address explicitly. On Vercel req.url is the public https address and is used as it is.
+ */
+function sessionCheckUrl(req: NextRequest): URL {
+  if (process.env.INTERNAL_APP_URL) return new URL('/api/auth/me', process.env.INTERNAL_APP_URL);
+  const url = new URL('/api/auth/me', req.url);
+  if (['localhost', '127.0.0.1', '0.0.0.0', '[::1]', '::1'].includes(url.hostname)) url.protocol = 'http:';
+  return url;
+}
+
 function hasPermission(payload: any, required: string[]): boolean {
   if (!payload) return false;
   const perms: string[] = payload.permissions || [];
@@ -134,7 +149,7 @@ export async function middleware(req: NextRequest) {
   // not claims that may have been revoked since this JWT was issued.
   if (!isApiPath) {
     try {
-      const sessionResponse = await fetch(new URL('/api/auth/me', req.url), {
+      const sessionResponse = await fetch(sessionCheckUrl(req), {
         headers: { cookie: `${COOKIE_NAME}=${encodeURIComponent(token)}` },
         cache: 'no-store',
       });
