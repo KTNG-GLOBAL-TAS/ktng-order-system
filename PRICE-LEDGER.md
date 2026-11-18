@@ -47,6 +47,15 @@ installations; existing role templates are edited in Admin → Roles). Every cha
 
 ## Hosting on Railway
 
-`railway.json`: before every deploy `npx prisma migrate deploy`, then `npm run start`; health check `/api/auth/setup`.
-Variables: `DATABASE_URL` (the Railway Postgres), `JWT_SECRET`, `BACKUP_ENCRYPTION_KEY`; Google Drive, Supabase storage (product
-images) and Turnstile are optional and stay off until their keys are set.
+Two services in one Railway project, same region: this application and a `Postgres` service with a volume.
+
+Service settings (set in the Railway dashboard — config files are not read for new services):
+
+- pre-deploy command `npx prisma migrate deploy` (every deploy applies the pending migrations first);
+- health check path `/api/auth/setup`, target port 8080;
+- variables: `DATABASE_URL` = `${{Postgres.DATABASE_URL}}`, `JWT_SECRET` and `BACKUP_ENCRYPTION_KEY` (generated in the dashboard,
+  never written anywhere else). Google Drive, Supabase storage (product images) and Turnstile are optional and stay off until
+  their keys are set.
+
+When the repository is read by its public link (without the Railway GitHub App), a new commit is deployed with
+Settings → Source → «Check for updates», not automatically.
