@@ -64,6 +64,7 @@ export const en: Dictionary = {
     catalog: 'Product Catalog',
     orderHistory: 'Order History',
     analytics: 'Analytics',
+    priceLedger: 'Price Ledger',
     profile: 'Profile',
     adminConsole: 'Admin Console',
     sellerConsole: 'Seller Console',

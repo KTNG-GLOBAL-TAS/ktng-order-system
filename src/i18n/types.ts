@@ -65,6 +65,7 @@ export interface NavigationTranslations {
   catalog: string;
   orderHistory: string;
   analytics: string;
+  priceLedger: string;
   profile: string;
   adminConsole: string;
   sellerConsole: string;

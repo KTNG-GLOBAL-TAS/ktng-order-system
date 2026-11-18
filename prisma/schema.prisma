@@ -78,6 +78,7 @@ model Product {
   createdAt        DateTime      @default(now())
   updatedAt        DateTime      @updatedAt
   orderItems       OrderItem[]
+  ledgerProducts   LedgerProduct[]
   skuAllocations   OrderItemSku[]
   tags             Tag[]         @relation("ProductTags")
   sourcePromotions Promotion[]   @relation("SourceProductPromotions")
@@ -310,6 +311,7 @@ model Company {
   users             User[]
   orders            Order[]
   promotions        Promotion[] @relation("CompanyPromotions")
+  ledgerDistributors LedgerDistributor[]
 }
 
 model Promotion {
@@ -358,4 +360,118 @@ model DailySequence {
   dateKey   String   @id // e.g. "WAREHOUSE_27092026"
   lastValue Int      @default(0)
   updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// Price & discount ledger — three linked price levels (base supply price with dated history → distributor price → consumer price)
+// and the check of SAP sales orders against the base price. An additive module: its own registry of products and distributors,
+// linked to the catalog Product (by SKU) and to Company when they exist; the ordering engine does not read these tables.
+// Settings live in SystemSetting, key "ledger.config".
+// ─────────────────────────────────────────────
+model LedgerProduct {
+  id          String   @id @default(cuid())
+  code        String
+  codeKey     String   @unique // lower(code): one product per code, whatever the case
+  name        String
+  unit        String   @default("")
+  distRate    Float?   // own distributor markup, % (null → the default from the settings)
+  consRate    Float?   // own consumer markup, %
+  distFixed   Float?   // fixed distributor price excl. VAT (replaces the rate)
+  consFixed   Float?   // fixed consumer price excl. VAT
+  isActive    Boolean  @default(true)
+  isSample    Boolean  @default(false)
+  productId   String?  // the catalog product with the same SKU, when there is one
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  prices      LedgerPrice[]
+  orderLines  LedgerOrderLine[]
+
+  @@index([productId])
+}
+
+model LedgerPrice {
+  id          String             @id @default(cuid())
+  productId   String
+  product     LedgerProduct      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supplyNet   Float              // base price: the standard distributor's supply price excl. VAT
+  validFrom   DateTime           @db.Date
+  changeId    String?            // set when a bulk price change created this price
+  change      LedgerPriceChange? @relation(fields: [changeId], references: [id], onDelete: Cascade)
+  note        String             @default("")
+  isSample    Boolean            @default(false)
+  createdById String?
+  createdAt   DateTime           @default(now())
+
+  @@index([productId, validFrom])
+  @@index([changeId])
+}
+
+model LedgerDistributor {
+  id          String   @id @default(cuid())
+  name        String
+  isStandard  Boolean  @default(false) // only one: its supply price is the base price
+  refRate     Float?   // reference discount, % (orders above it by more than the tolerance are flagged)
+  note        String   @default("")
+  isSample    Boolean  @default(false)
+  companyId   String?  // the ordering company, when it is the same distributor
+  company     Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  updatedById String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  orders      LedgerOrder[]
+
+  @@index([companyId])
+}
+
+model LedgerPriceChange {
+  id          String   @id @default(cuid())
+  title       String
+  date        DateTime @db.Date
+  dir         String   // "up" | "down"
+  method      String   // "pct" | "amt"
+  value       Float
+  adjustFixed Boolean  @default(false)
+  fixedBefore Json     @default("{}") // { [ledgerProductId]: { distFixed, consFixed } } — restored when the change is cancelled
+  count       Int      @default(0)
+  isSample    Boolean  @default(false)
+  createdById String?
+  createdAt   DateTime @default(now())
+  prices      LedgerPrice[]
+
+  @@index([date])
+}
+
+model LedgerOrder {
+  id            String            @id @default(cuid())
+  orderNo       String?           @unique // SAP sales order number; one number is registered once
+  date          DateTime          @db.Date
+  distributorId String
+  distributor   LedgerDistributor @relation(fields: [distributorId], references: [id], onDelete: Restrict)
+  basis         String            @default("net") // "net" | "gross": how the amounts were typed
+  note          String            @default("")
+  isSample      Boolean           @default(false)
+  createdById   String?
+  updatedById   String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  lines         LedgerOrderLine[]
+
+  @@index([date])
+  @@index([distributorId, date])
+}
+
+model LedgerOrderLine {
+  id        String        @id @default(cuid())
+  orderId   String
+  order     LedgerOrder   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   LedgerProduct @relation(fields: [productId], references: [id], onDelete: Restrict)
+  qty       Float
+  amount    Float         // the line's sales amount as typed (net or gross — LedgerOrder.basis)
+  position  Int           @default(0)
+
+  @@index([orderId])
+  @@index([productId])
 }

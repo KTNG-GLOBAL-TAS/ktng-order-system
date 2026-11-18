@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Users, ShoppingBag, FolderSymlink, MapPin, FileClock, 
-  Settings, LogOut, User, Loader2, Sparkles, Tag, Menu, X, ChevronRight, Shield, FileUp, Building2, BarChart3, Percent, Layers3, KeyRound
+  Settings, LogOut, User, Loader2, Sparkles, Tag, Menu, X, ChevronRight, Shield, FileUp, Building2, BarChart3, Percent, Layers3, KeyRound, BadgePercent
 } from 'lucide-react';
 import { useTranslation } from '@/i18n/context';
 import { LanguageSwitcher } from '@/components/LanguageSwitcher';
@@ -105,6 +105,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const allMenuItems = [
     { name: t('navigation.dashboard'), path: '/admin', icon: LayoutDashboard, required: [] },
     { name: t('navigation.analytics'), path: '/analytics', icon: BarChart3, required: ['analytics:view'] },
+    { name: t('navigation.priceLedger'), path: '/ledger', icon: BadgePercent, required: ['ledger:view', 'ledger:edit'] },
     { name: t('navigation.users'), path: '/admin/users', icon: Users, required: ['users:read', 'users:manage'] },
     { name: t('navigation.roles'), path: '/admin/roles', icon: KeyRound, required: ['roles:manage', 'users:manage'] },
     { name: t('navigation.companies'), path: '/admin/companies', icon: Building2, required: ['companies:read', 'companies:manage'] },

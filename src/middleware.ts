@@ -89,6 +89,7 @@ export async function middleware(req: NextRequest) {
   const isSellerPath = pathname.startsWith('/seller');
   const isCustomerPath = pathname.startsWith('/customer');
   const isAnalyticsPath = pathname.startsWith('/analytics');
+  const isLedgerPath = pathname === '/ledger' || pathname.startsWith('/ledger/');
   const isApiPath = pathname.startsWith('/api');
   const isAuthApi = pathname.startsWith('/api/auth');
 
@@ -97,7 +98,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const isProtected = isAdminPath || isSellerPath || isCustomerPath || isAnalyticsPath || (isApiPath && !isAuthApi);
+  const isProtected = isAdminPath || isSellerPath || isCustomerPath || isAnalyticsPath || isLedgerPath || (isApiPath && !isAuthApi);
 
   if (!isProtected) {
     return NextResponse.next();
@@ -271,6 +272,13 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // 11. Price & discount ledger (the page; /api/ledger checks the live permissions in its handlers)
+  if (isLedgerPath) {
+    if (!hasPermission(payload, ['ledger:view', 'ledger:edit'])) {
+      return new NextResponse('Доступ запрещен', { status: 403 });
+    }
+  }
+
   return NextResponse.next();
 }
 
@@ -281,6 +289,7 @@ export const config = {
     '/seller/:path*',
     '/customer/:path*',
     '/analytics/:path*',
+    '/ledger/:path*',
     '/api/:path*',
   ],
 };

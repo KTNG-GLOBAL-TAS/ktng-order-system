@@ -64,6 +64,7 @@ export const ru: Dictionary = {
     catalog: 'Каталог товаров',
     orderHistory: 'История заказов',
     analytics: 'Аналитика',
+    priceLedger: 'Реестр цен',
     profile: 'Личный кабинет',
     adminConsole: 'В консоль админа',
     sellerConsole: 'Консоль продавца',

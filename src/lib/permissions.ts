@@ -96,6 +96,15 @@ export const PERMISSION_GROUPS: PermissionGroup[] = [
     ]
   },
   {
+    id: 'ledger',
+    name: 'Реестр цен и скидок',
+    description: 'Три уровня цен, история базовых цен и проверка скидок по заказам SAP',
+    permissions: [
+      { code: 'ledger:view', name: 'Просмотр реестра цен', description: 'Прайс-лист на дату, история цен, результаты проверки заказов, выгрузка в Excel' },
+      { code: 'ledger:edit', name: 'Ведение реестра цен', description: 'Ввод заказов SAP, товары и базовые цены, изменения цен, дистрибьюторы, настройки расчёта' }
+    ]
+  },
+  {
     id: 'system',
     name: 'Система & Безопасность',
     description: 'Журналы событий и резервное копирование',
@@ -143,7 +152,8 @@ export const DEFAULT_ROLE_TEMPLATES: DefaultRoleDefinition[] = [
       'products:stock_update',
       'companies:read',
       'promotions:read',
-      'analytics:view'
+      'analytics:view',
+      'ledger:view'
     ]
   },
   {
@@ -203,7 +213,9 @@ export const DEFAULT_ROLE_TEMPLATES: DefaultRoleDefinition[] = [
       'orders:warehouse_request:view',
       'orders:warehouse_request:download',
       'orders:export',
-      'analytics:view'
+      'analytics:view',
+      'ledger:view',
+      'ledger:edit'
     ]
   }
 ];

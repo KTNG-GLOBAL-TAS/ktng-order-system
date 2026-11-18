@@ -26,7 +26,9 @@ const ALL_PERMISSIONS = [
   'placeholders:manage',
   'import:execute',
   'logs:view',
-  'settings:manage'
+  'settings:manage',
+  'ledger:view',
+  'ledger:edit'
 ];
 
 const DEFAULT_ROLE_TEMPLATES = [
@@ -53,7 +55,8 @@ const DEFAULT_ROLE_TEMPLATES = [
       'products:stock_update',
       'companies:read',
       'promotions:read',
-      'analytics:view'
+      'analytics:view',
+      'ledger:view'
     ]
   },
   {

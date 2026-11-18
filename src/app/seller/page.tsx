@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { 
   Briefcase, Download, Filter, Search, UserCheck, AlertCircle, 
   Loader2, DollarSign, Package, Layers, TrendingUp, ShoppingBag, Eye, MessageSquare, 
-  BarChart3, Edit, Plus, Trash2, Check, X, Shield, RefreshCw, FileSpreadsheet, Upload, CheckCircle2, Calendar, XCircle,
+  BarChart3, BadgePercent, Edit, Plus, Trash2, Check, X, Shield, RefreshCw, FileSpreadsheet, Upload, CheckCircle2, Calendar, XCircle,
   ChevronDown, ChevronUp
 } from 'lucide-react';
 import { breakdownPacks, formatCaseQuantity } from '@/lib/conversion';
@@ -836,6 +836,15 @@ export default function SellerDashboard() {
           <BarChart3 className="w-4 h-4 text-cyan-400" />
           <span>{t('navigation.analytics')}</span>
         </a>
+        {(isSuperadmin || permissions.includes('ledger:view') || permissions.includes('ledger:edit')) && (
+          <a
+            href="/ledger"
+            className="px-5 py-3 text-xs font-extrabold uppercase tracking-wider transition-all border-b-2 border-transparent text-slate-400 hover:text-white hover:bg-white/5 flex items-center gap-2"
+          >
+            <BadgePercent className="w-4 h-4 text-cyan-400" />
+            <span>{t('navigation.priceLedger')}</span>
+          </a>
+        )}
       </div>
 
       {activeTab === 'orders' ? (

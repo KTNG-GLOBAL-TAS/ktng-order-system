@@ -64,6 +64,7 @@ export const uz: Dictionary = {
     catalog: 'Mahsulotlar katalogi',
     orderHistory: 'Buyurtmalar tarixi',
     analytics: 'Tahlillar',
+    priceLedger: 'Narx reestri',
     profile: 'Shaxsiy kabinet',
     adminConsole: 'Admin konsoli',
     sellerConsole: 'Sotuvchi konsoli',
